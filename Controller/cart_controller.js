@@ -1,4 +1,12 @@
 import { cart } from "../Model/cart_model.js"
+import { Product } from "../Model/product_model.js";
+import { Payment } from "../Model/payment_model.js";
+import Stripe from "stripe";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const getusercart = async(req, res) => {
     try {
@@ -88,4 +96,96 @@ const deletefromcart = async(req, res) => {
 };
 
 
-export { addtousercart, getusercart, updatecartquantity, deletefromcart }
+
+const processPayment = async(req, res) => {
+    try {
+        const { userid } = req.params;
+
+        const userCart = await cart.findOne({ userid }).populate("products.productid");
+
+        if (!userCart || userCart.products.length === 0) {
+            return res.status(400).json({ message: "Cart is empty" });
+        }
+
+        const totalAmount = userCart.products.reduce(
+            (sum, item) => sum + item.productid.price * item.quantity,
+            0
+        );
+
+        if (totalAmount <= 0) {
+            return res.status(400).json({ message: "Invalid total amount", totalAmount });
+        }
+
+        return res.status(200).json({ message: "Total Amount Calculated", totalAmount });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+
+// const processPayment = async(req, res) => {
+//     try {
+//         const { userid } = req.params;
+//         const { paymentMethodId } = req.body; 
+
+//         // ✅ Fetch User Cart
+//         const userCart = await cart.findOne({ userid }).populate({
+//             path: "products.productid",
+//             model: "Product"
+//         });
+
+//         if (!userCart || userCart.products.length === 0) {
+//             return res.status(400).json({ message: "Cart is empty" });
+//         }
+
+
+//         const totalAmount = userCart.products.reduce(
+//             (sum, item) => sum + item.productid.price * item.quantity,
+//             0
+//         );
+
+//         if (totalAmount <= 0) {
+//             return res.status(400).json({ message: "Invalid total amount", totalAmount });
+//         }
+
+
+//         const paymentIntent = await stripe.paymentIntents.create({
+//             amount: Math.round(totalAmount * 100), 
+//             currency: "usd",
+//             payment_method: paymentMethodId,
+//             confirm: true,
+//         });
+
+
+//         const newPayment = new Payment({
+//             userid,
+//             amount: totalAmount,
+//             currency: "usd",
+//             paymentMethodId,
+//             paymentStatus: "successful",
+//             transactionId: paymentIntent.id
+//         });
+
+//         await newPayment.save();
+
+
+//         userCart.products = [];
+//         await userCart.save();
+
+//         res.status(200).json({
+//             message: "Payment successful",
+//             paymentIntent,
+//             totalAmount
+//         });
+
+//     } catch (error) {
+//         res.status(500).json({ message: error.message });
+//     }
+// };
+
+
+
+
+
+export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment }

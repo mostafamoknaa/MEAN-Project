@@ -6,6 +6,8 @@ yarn-error.log
 package-lock.json
 yarn.lock
 
+node_modules
+
 # Environment variables
 .env
 .env.local

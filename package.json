@@ -19,7 +19,9 @@
     },
     "homepage": "https://github.com/mostafamoknaa/MEAN-Project#readme",
     "dependencies": {
+        "dotenv": "^16.4.7",
         "express": "^4.21.2",
-        "mongoose": "^8.10.2"
+        "mongoose": "^8.10.2",
+        "stripe": "^17.7.0"
     }
 }
