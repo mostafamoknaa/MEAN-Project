@@ -1,16 +1,14 @@
 import express from 'express';
 import { connectDB } from "./Model/connect.js"
-import { cart } from './Model/cart_model.js';
-
-
-
+import { cartRoutes } from "./Route/cart_route.js"
 const app = express()
 app.use(express.json())
+app.use(cartRoutes);
 
 const port = 3000
 
 connectDB;
-cart;
+
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
