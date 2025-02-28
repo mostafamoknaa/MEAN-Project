@@ -1,9 +1,15 @@
 import express from 'express';
 import { connectDB } from "./Model/connect.js"
 import { cartRoutes } from "./Route/cart_route.js"
+import { router3 } from "./Route/auth_route.js"
+import { route } from "./Route/user_route.js"
+
+
 const app = express()
 app.use(express.json())
 app.use(cartRoutes);
+app.use(route);
+app.use(router3);
 
 const port = 3000
 
