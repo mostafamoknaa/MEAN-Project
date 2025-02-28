@@ -97,6 +97,16 @@ const deletefromcart = async(req, res) => {
 
 
 
+const gustuser = async(req, res) => {
+    try {
+        req.session.cart = req.body.cart || [];
+        const cart = req.session.cart;
+        res.status(200).json(cart);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 const processPayment = async(req, res) => {
     try {
         const { userid } = req.params;
@@ -188,4 +198,4 @@ const processPayment = async(req, res) => {
 
 
 
-export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment }
+export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser }
