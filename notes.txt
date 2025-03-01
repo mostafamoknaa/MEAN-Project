@@ -1,0 +1,12 @@
+i want to make Auth and sign up and sign in and hash password and make a token 
+store in database and also check if user already exist in database
+
+
+steps 
+
+1) connection with database 
+2) create amodel 
+3) create routes
+4) create controller
+craete middle ware
+
