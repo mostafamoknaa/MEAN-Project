@@ -2,12 +2,14 @@ import express from 'express';
 import { connectDB } from "./Model/connect.js"
 import { cartRoutes } from "./Route/cart_route.js"
 import { prompRoute } from './Route/promocode_route.js';
+import { orderRoutes } from './Route/order_roure.js';
 
 
 const app = express()
 app.use(express.json())
 app.use(cartRoutes);
 app.use(prompRoute);
+app.use(orderRoutes);
 
 const port = 3000
 
