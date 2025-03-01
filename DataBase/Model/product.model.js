@@ -5,7 +5,7 @@ const productSchema = new mongoose.Schema({
     description: { type: String, default: "" },
     price: { type: Number, required: true, min: 0 },
     discountPrice: { type: Number, min: 0 },
-    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: true },
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: false },
     subcategory: { type: mongoose.Schema.Types.ObjectId, ref: "Subcategory" },
     seller: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     images: [{ type: String, match: /^https?:\/\/.+/ }],

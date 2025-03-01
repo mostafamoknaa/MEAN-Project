@@ -2,17 +2,48 @@ import { productModel } from "../../DataBase/Model/product.model.js";
 
 // Get all products
 const getProducts = async (req, res) => {
-    const products = await productModel.find().populate("category subcategory seller");
-    res.status(200).json({ message: "Done", data: products });
+    try {
+        let { search, minPrice, maxPrice, category, sortBy, order } = req.query;
+        let query = {};
+        let sortOptions = {};
+
+        if (search) {
+            query.name = { $regex: search, $options: "i" };
+        }
+
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) query.price.$gte = parseFloat(minPrice);
+            if (maxPrice) query.price.$lte = parseFloat(maxPrice);
+        }
+
+        if (category) {
+            query.category = category;
+        }
+
+        if (sortBy) {
+            const validFields = ["price", "createdAt"];
+            if (validFields.includes(sortBy)) {
+                sortOptions[sortBy] = order === "desc" ? -1 : 1;
+            }
+        }
+
+        const products = await productModel.find(query).sort(sortOptions);
+
+        if (products.length === 0) {
+            return res.status(404).json({ message: "No products found matching your search." });
+        }
+
+        res.status(200).json({ message: "Done", data: products });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error", error });
+    }
 };
 
 // Get product by ID
 const getProductById = async (req, res) => {
     try {
-        const product = await productModel.findById(req.params.id).populate({
-            path: "category",
-            select: "name _id"
-        });
+        const product = await productModel.findById(req.params.id);
 
         if (!product) {
             return res.status(404).json({ message: "Product not found" });
@@ -23,7 +54,6 @@ const getProductById = async (req, res) => {
         res.status(500).json({ error: "Invalid ID format or internal error" });
     }
 };
-
 
 // Create new product
 const createProduct = async (req, res) => {

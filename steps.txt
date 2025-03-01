@@ -1,0 +1,44 @@
+http://localhost:3000/api/products
+
+http://localhost:3000/api/products?search=iphone
+
+http://localhost:3000/api/products?search=Gaming Laptop
+
+http://localhost:3000/api/products?minPrice=500&maxPrice=2000	
+
+http://localhost:3000/api/products?category=65e1d09c5f3e6d001cabc123
+
+http://localhost:3000/api/products?sortBy=price&order=asc
+
+http://localhost:3000/api/products?sortBy=createdAt&order=asc
+
+http://localhost:3000/api/products?search=laptop&sortBy=price&order=asc
+
+{
+  "name": "Laptop",
+  "description": "Gaming laptop",
+  "price": 1500,
+  "subcategory": "65e1d09c5f3e6d001cabc456",
+  "seller": "65e1d09c5f3e6d001cabc789",
+  "images": ["https://example.com/laptop.jpg"]
+}
+
+{
+  "name": "Gaming Laptop",
+  "description": "High-performance laptop for gaming and work",
+  "price": 2000,
+  "discountPrice": 1800,
+  "category": "65e1d09c5f3e6d001cabc123",
+  "subcategory": "65e1d09c5f3e6d001cabc456",
+  "seller": "65e1d09c5f3e6d001cabc789",
+  "images": [
+    "https://example.com/laptop-front.jpg",
+    "https://example.com/laptop-back.jpg"
+  ],
+  "variations": {
+    "RAM": "16GB",
+    "Storage": "1TB SSD",
+    "Color": "Black"
+  }
+}
+
