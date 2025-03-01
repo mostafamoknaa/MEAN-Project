@@ -1,6 +1,7 @@
 import { cart } from "../Model/cart_model.js"
 import { Product } from "../Model/product_model.js";
 import { Payment } from "../Model/payment_model.js";
+import { PromoCode } from "../Model/promocode_model.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
@@ -112,7 +113,6 @@ const processPayment = async(req, res) => {
         const { userid } = req.params;
 
         const userCart = await cart.findOne({ userid }).populate("products.productid");
-
         if (!userCart || userCart.products.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
@@ -132,6 +132,31 @@ const processPayment = async(req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+const applypromocode = async(req, res) => {
+    try {
+        const { userid } = req.params;
+        const { promocode } = req.body;
+        const userCart = await cart.findOne({ userid }).populate("products.productid");
+        if (!userCart || userCart.products.length === 0) {
+            return res.status(400).json({ message: "Cart is empty" });
+        }
+        const promocodeData = await PromoCode.findOne({ code: promocode });
+        if (!promocodeData) {
+            return res.status(400).json({ message: "Invalid promocode" });
+        }
+        const totalAmount = userCart.products.reduce(
+            (sum, item) => sum + item.productid.price * item.quantity,
+            0
+        );
+        const discount = (totalAmount * promocodeData.discountValue) / 100;
+        const finalAmount = totalAmount - discount;
+        return res.status(200).json({ message: "Promocode applied", finalAmount });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 // const processPayment = async(req, res) => {
@@ -198,4 +223,4 @@ const processPayment = async(req, res) => {
 
 
 
-export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser }
+export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser, applypromocode }
