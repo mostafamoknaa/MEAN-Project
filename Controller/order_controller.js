@@ -1,6 +1,7 @@
 import { cart } from "../Model/cart_model.js";
 import { PromoCode } from "../Model/promocode_model.js";
 import { orderModel } from "../Model/order_model.js";
+import { sendEmail } from "../Email/ordermail.js";
 
 const makeorder = async(req, res) => {
     try {
@@ -12,7 +13,6 @@ const makeorder = async(req, res) => {
         if (!usercart || usercart.products.length === 0) {
             return res.status(400).json({ message: "Your cart is empty" });
         }
-
 
         let totalAmount = usercart.products.reduce((sum, item) => sum + item.productid.price * item.quantity, 0);
         let discountAmount = 0;
@@ -47,9 +47,8 @@ const makeorder = async(req, res) => {
         });
 
         await newOrder.save();
-
-
-        await cart.findOneAndUpdate({ userid }, { $set: { products: [] } });
+        sendEmail(req.body.email, newOrder);
+        //await cart.findOneAndUpdate({ userid }, { $set: { products: [] } });
 
 
         res.status(201).json({ message: "Order placed successfully", order: newOrder });
