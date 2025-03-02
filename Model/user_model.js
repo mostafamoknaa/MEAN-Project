@@ -12,6 +12,7 @@ const userSchema = mongoose.Schema({
         city: String,
         country: String
     },
+    isConfirmed: { type: Boolean, default: false },
     paymentMethods: String,
 }, {
     timestamps: true,

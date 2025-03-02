@@ -8,8 +8,7 @@ export const authMiddleware = (req, res, next) => {
     }
 
     try {
-        const decodedd = jwt.verify(token, 'iti');
-        console.log(decodedd)
+        const decodedd = jwt.verify(token, 'mostafa');
         req.user = decodedd;
         next();
     } catch (e) {
