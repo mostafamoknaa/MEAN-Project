@@ -1,6 +1,7 @@
 import { cart } from "../Model/cart_model.js"
 import { Product } from "../Model/product_model.js";
 import { Payment } from "../Model/payment_model.js";
+import { PromoCode } from "../Model/promocode_model.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
@@ -10,7 +11,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const getusercart = async(req, res) => {
     try {
-        const { userid } = req.params;
+
+        const userid = req.user.id;
         const cartdata = await cart.find({ userid: userid })
         res.status(200).json(cartdata.length ? cartdata : "Your Cart is empty");
     } catch (error) {
@@ -22,7 +24,7 @@ const getusercart = async(req, res) => {
 
 const addtousercart = async(req, res) => {
     try {
-        const { userid } = req.params;
+        const userid = req.user.id;
         const { productid, quantity } = req.body;
         let userCart = await cart.findOne({ userid });
 
@@ -53,7 +55,7 @@ const addtousercart = async(req, res) => {
 
 const updatecartquantity = async(req, res) => {
     try {
-        const { userid } = req.params;
+        const userid = req.user.id;
         const { productid, quantity } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
@@ -75,7 +77,7 @@ const updatecartquantity = async(req, res) => {
 
 const deletefromcart = async(req, res) => {
     try {
-        const { userid } = req.params;
+        const userid = req.user.id;
         const { productid } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
@@ -109,10 +111,9 @@ const gustuser = async(req, res) => {
 
 const processPayment = async(req, res) => {
     try {
-        const { userid } = req.params;
+        const userid = req.user.id;
 
         const userCart = await cart.findOne({ userid }).populate("products.productid");
-
         if (!userCart || userCart.products.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
         }
@@ -132,6 +133,31 @@ const processPayment = async(req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+const applypromocode = async(req, res) => {
+    try {
+        const userid = req.user.id;
+        const { promocode } = req.body;
+        const userCart = await cart.findOne({ userid }).populate("products.productid");
+        if (!userCart || userCart.products.length === 0) {
+            return res.status(400).json({ message: "Cart is empty" });
+        }
+        const promocodeData = await PromoCode.findOne({ code: promocode });
+        if (!promocodeData) {
+            return res.status(400).json({ message: "Invalid promocode" });
+        }
+        const totalAmount = userCart.products.reduce(
+            (sum, item) => sum + item.productid.price * item.quantity,
+            0
+        );
+        const discount = (totalAmount * promocodeData.discountValue) / 100;
+        const finalAmount = totalAmount - discount;
+        return res.status(200).json({ message: "Promocode applied", finalAmount });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 
 
 // const processPayment = async(req, res) => {
@@ -198,4 +224,4 @@ const processPayment = async(req, res) => {
 
 
 
-export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser }
+export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser, applypromocode }
