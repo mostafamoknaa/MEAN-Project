@@ -10,6 +10,7 @@ const orderschema=mongoose.Schema({
       required: true 
     },
 
+<<<<<<< HEAD
 
 
     items: [
@@ -29,6 +30,10 @@ const orderschema=mongoose.Schema({
         }
       ],
       totalAmount: { type: Number, required: true },
+=======
+    total_price: { type: Number, required: true },
+     
+>>>>>>> master
       status: { 
         type: String, 
         enum: ["pending", "processing", "shipped", "delivered", "cancelled", "returned"], 

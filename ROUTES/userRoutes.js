@@ -1,9 +1,9 @@
 import express from "express";
 
-import  { signup, login ,verfiyemail} from "../CONTROLLER/userController.js"
+import  { signup, login, verfiyemail , updateUser, deleteUser , createUser , getUserById, getAllUsers} from "../CONTROLLER/userController.js"
 
 
-
+// NORMAL CUSTOMER OR SELLER
 
 const route=express.Router();
 
@@ -14,13 +14,17 @@ route.post('/login', login);
 route.get("/verfiy/:email",verfiyemail);
 
 
-// route.get('/users',getAllUsers);
+//ADMIN CRUD
 
 
-// route.post( '/users',createUser);
+route.get('/users',getAllUsers);
 
-// route.put( '/users/:id',updateUser);
+route.get('/users/:id',getUserById);
 
-// route.delete( '/users/:id',deleteUser);
+route.post( '/users',createUser);
+
+route.put( '/users/:id',updateUser);
+
+route.delete( '/users/:id',deleteUser);
 
 export default route; 

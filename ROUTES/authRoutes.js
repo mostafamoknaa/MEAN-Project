@@ -34,8 +34,13 @@ router3.get('/auth/google/callback', async (req, res) => {
       headers: { Authorization: `Bearer ${access_token}` },
     });
    
-   
+    const findemail = await userModel.findOne({email : profile.email});
     
+    console.log(findemail);
+    
+    if (findemail) {
+      res.sendFile(path.resolve('public/home.html'));
+      } else {
     
         
      const user = new userModel({
@@ -46,10 +51,10 @@ router3.get('/auth/google/callback', async (req, res) => {
       });
       await user.save();
     
-
+   
     console.log("👤 User Profile:", profile); 
     res.sendFile(path.resolve('public/home.html'));
-
+    }
     
    // res.send(`<h1>Welcome, ${profile.name}</h1><p>Email: ${profile.email}</p><img src="${profile.picture}" alt="Profile Picture">`);
   } catch (error) {
