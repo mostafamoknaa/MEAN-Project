@@ -11,7 +11,7 @@ export async function sendEmail(email, orderData) {
         },
     });
 
-    //const myemail = jwt.sign(email, "myemail")
+    const myemail = jwt.sign(email, "myemail")
 
     let emailHtml = emailTemplate(orderData);
 

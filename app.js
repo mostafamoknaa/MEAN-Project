@@ -8,9 +8,9 @@ import { router3 } from './Route/auth_route.js';
 
 const app = express()
 app.use(express.json())
+app.use(route);
 app.use(cartRoutes);
 app.use(orderRoutes);
-app.use(route);
 app.use(prompRoute);
 app.use(router3);
 

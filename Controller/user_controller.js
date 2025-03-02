@@ -5,66 +5,63 @@ import sendEmail from '../Email/email.js'
 
 const signup = async(req, res) => {
     try {
-        let foundedEmail = await userModel.findOne({ email: req.body.email });
 
-        if (foundedEmail) {
-            return res.status(400).send({ message: "Email already exists" });
+        const user = await userModel.findOne({ email: req.body.email });
+        if (user) {
+            res.send("User already exists");
+            return
         }
-
         req.body.password = await bcrypt.hashSync(req.body.password, 10);
+        const users = await userModel.insertMany(req.body);
+        sendEmail(req.body.email)
+        res.send("User created successfully");
 
-        let user = new userModel(req.body);
-        await user.save();
-        sendEmail(req.body.email);
-        res.status(201).send({ message: "User registered successfully" });
-    } catch (e) {
-        res.status(500).json({ message: e.message });
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
-};
+}
 
+const signin = async(req, res) => {
+    try {
+        const { email, password } = req.body;
+        const user = await userModel.findOne({ email });
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (user.isConfirmed == false) {
+            res.status(400).json({ message: "Please verify your email" });
+            return
+        }
+        if (user && isMatch && (user.isConfirmed == true)) {
+            const token = jwt.sign({ id: user._id, email: user.email }, 'mostafa', function(err, token) {
+                console.log(token);
+            });
 
-
-const login = async(req, res) => {
-
-    let user = await userModel.findOne({ email: req.body.email })
-    if (!user) {
-        return res.status(400).send({ message: "Invalid email" })
+            res.json({ message: "User logged in successfully", token });
+        } else {
+            res.status(400).json({ message: "Invalid email or password" });
+        }
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
-    let isValidPassword = await bcrypt.compareSync(req.body.password, user.password)
-    if (!isValidPassword) {
-        return res.status(400).send({ message: "Invalid password" })
-    }
-    if (user.isconfermed != true) {
+}
 
-        return res.status(400).send({ message: "Email not confirmed" })
-    }
-
-    const token = jwt.sign({ id: user._id, email: user.email }, 'iti', function(err, token) {
-        console.log(token);
-    });
-
-    res.status(200).send(token);
-
-};
+const verifyEmail = (req, res) => {
+    const token = req.params.email
+    jwt.verify(token, "myemail", async(err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: "Invalid token" })
+        }
+        const email = decoded;
+        await userModel.findOneAndUpdate({ email: email }, { isConfirmed: true })
 
 
+        res.json({ message: "Email verified you can now login" })
+    })
 
-const verfiyemail = async(req, res) => {
-
-    const token = await req.params.email;
-    console.log(token);
-
-    let emailVerfiy = jwt.verify(token, 'myemail');
-    console.log(emailVerfiy);
-    let user = await userModel.findOneAndUpdate({ email: emailVerfiy }, { isconfermed: true });
-    res.send("EMAIL VERFIYED")
-
-};
+}
 
 
 
 
 
 
-
-export { signup, login, verfiyemail };
+export { signup, signin, verifyEmail };
