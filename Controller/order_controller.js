@@ -30,7 +30,6 @@ const makeorder = async(req, res) => {
 
         let paymentStatus = paymentMethod === "card" ? "pending" : "paid";
 
-
         const newOrder = new orderModel({
             user: userid,
             items: usercart.products.map((item) => ({
