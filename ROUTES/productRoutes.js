@@ -1,17 +1,27 @@
 import express from "express";
+import  { createProduct,getSellerProducts,updateProductBySeller,deleteProductBySeller,getAllProducts } from  '../CONTROLLER/productcontroller.js';
+
+import authMiddleware from '../MIDDLEWARE/Auth_Token.js'
 
 
-const route=express.Router();
+         
 
-// ADMIN CRUD FOR PRODUCT  WITHOUT CREATE PRODUCT
-route.get('/product',getAllProduct);
+const route5=express.Router();
+
+// seller CRUD FOR PRODUCT  
+route5.post('/product',authMiddleware,createProduct);
 
 
-route.put('/product/:id', updateProduct);
+route5.get('/product',authMiddleware, getSellerProducts);
 
-route.delete('/product/:id', deleteProduct);
+route5.get('/allproduct', getAllProducts);
 
+route5.put('/product/:id',authMiddleware,updateProductBySeller);
+route5.delete('/product/:id',authMiddleware,deleteProductBySeller);
+
+
+export default route5;
       
-//SELLER ALL CRUD OPERATIONS
+
 
 

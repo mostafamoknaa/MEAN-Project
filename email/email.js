@@ -15,7 +15,7 @@ import jwt from "jsonwebtoken";
     const myemail = jwt.sign(email, "myemail")
 
   const info = await transporter.sendMail({
-    from: '"this massage send from ELRO3B_STORE to verfiy your account 👻" <mo017886@gmail.com>', 
+    from: '"this massage send from ELRO3B_STORE to verfiy your account " <mo017886@gmail.com>', 
     to: email, 
     subject: "PLEASE VERIVY YOUR ACCOUNT", 
     text: "From ELRO3B_STORE WEBSITE",
@@ -26,4 +26,4 @@ import jwt from "jsonwebtoken";
  
 }
 
-export default sendEmail;  //export the function to use it in other files
+export default sendEmail; 

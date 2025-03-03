@@ -29,7 +29,7 @@ const productSchema = new Schema(
       required: true,
     },
     Promocode: {
-      type: Number,
+      type: String,
     },
     images: [
       {
