@@ -4,14 +4,13 @@ const sellerSchema = new mongoose.Schema(
   {
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Links to the User model (every seller is a user)
+      ref: "User", 
       required: true,
     },
     store_name: {
       type: String,
       required: true,
-      unique: true, // Ensure store names are unique
-     
+      unique: true, 
     },
     store_description: {
       type: String,
@@ -20,17 +19,16 @@ const sellerSchema = new mongoose.Schema(
     products: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "product", // Links to the Product model
+        ref: "product", 
       },
     ],
     is_verified: {
       type: Boolean,
-      default: false, // Default seller is not verified
+      default: false, 
     },
     address: {
-      street: String,
-      city: String
-     
+      street: { type: String, trim: true },
+      city: { type: String, trim: true },
     },
     contact: {
       email: {
@@ -40,10 +38,9 @@ const sellerSchema = new mongoose.Schema(
       phone: {
         type: String,
       },
-    }
-   
+    },
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 const SellerModel = mongoose.model("seller", sellerSchema);

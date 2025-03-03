@@ -115,6 +115,6 @@ const createReview = async (req, res) => {
 
   
 
-export {createReview,getUserAllReview,getAllReviewOfProduct,showAllReview,deleteReview} ;
+export   {createReview,getUserAllReview,getAllReviewOfProduct,showAllReview,deleteReview} ;
 
 
