@@ -32,7 +32,7 @@ const createseller = async (req, res) => {
       user.role = "seller";
       await user.save();
   
-      // Create new seller profile
+     
       const newSeller = new SellerModel({
         user_id: userID,
         store_name,
