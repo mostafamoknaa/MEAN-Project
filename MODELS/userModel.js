@@ -17,6 +17,14 @@ const userSchema = mongoose.Schema({
         country: String
     },
     paymentMethods : String,
+
+    wishlist:[
+              {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "product", 
+              }
+
+    ]
     
    
 

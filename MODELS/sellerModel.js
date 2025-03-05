@@ -9,8 +9,8 @@ const sellerSchema = new mongoose.Schema(
     },
     store_name: {
       type: String,
-      required: true,
-      unique: true, 
+      required: true
+     
     },
     store_description: {
       type: String,

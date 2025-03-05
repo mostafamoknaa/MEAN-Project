@@ -3,14 +3,6 @@ import { Schema, model } from "mongoose";
 const productSchema = new Schema(
   {
 
-<<<<<<< HEAD
-    userid:{
-      type: Schema.Types.ObjectId,
-      ref: 'User',
-    },
-
-
-=======
     seller_id:{
       type: Schema.Types.ObjectId,
       ref: 'User',
@@ -21,7 +13,6 @@ const productSchema = new Schema(
       type:String,
       required: true
     },
->>>>>>> master
     isfavourite:{
       type : Boolean,
       default : false
@@ -53,15 +44,7 @@ const productSchema = new Schema(
       type: Number,
       default: 0,
     },
-<<<<<<< HEAD
-    tags: [
-      {
-        type: String,
-      },
-    ],
-=======
     
->>>>>>> master
     isAvailble: {
       type: Boolean,
       default: true,
@@ -70,10 +53,7 @@ const productSchema = new Schema(
   
   {
     timestamps: true,
-<<<<<<< HEAD
-=======
     versionKey: false
->>>>>>> master
   }
 );
 
