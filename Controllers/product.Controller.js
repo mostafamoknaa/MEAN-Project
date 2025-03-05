@@ -1,4 +1,4 @@
-import { productModel } from "../../DataBase/Model/product.model.js";
+import { productModel } from "../Model/product.model.js";
 
 // Get all products
 const getProducts = async (req, res) => {
@@ -76,10 +76,45 @@ const deleteProduct = async (req, res) => {
     res.status(200).json({ message: "Product deleted" });
 };
 
+// Stock availability
+const getStockAvailability = async (req, res) => {
+    try {
+        const stock = await productModel.find({ stock: { $gt: 0 } });
+
+        if (stock.length === 0) {
+            return res.status(404).json({ message: "No products in stock" });
+        }
+
+        res.status(200).json({ message: "Done", data: stock });
+    } catch (error) {
+        res.status(500).json({ message: "Server Error", error });
+    }
+};
+
+// Stock availability By Id
+const getStockAvailabilityById = async (req, res) => {
+    try {
+        const product = await productModel.findById(req.params.id);
+        if (!product) {
+            return res.status(404).json({ message: "Product not found" });
+        }
+        res.status(200).json({ 
+            message: "Stock availability fetched successfully", 
+            stock: product.stock 
+        });
+    } catch (error) {
+        console.error("Error fetching stock availability:", error);
+        res.status(500).json({ message: "Server Error", error });
+    }
+};
+
+
 export {
     getProducts,
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getStockAvailability,
+    getStockAvailabilityById
 };

@@ -8,7 +8,8 @@ const productSchema = new mongoose.Schema({
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category", required: false },
     subcategory: { type: mongoose.Schema.Types.ObjectId, ref: "Subcategory" },
     seller: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-    images: [{ type: String, match: /^https?:\/\/.+/ }],
+    images: [{ type: String, match: /^https?:\/\/.+/, required: false }],
+    stock: { type: Number, required: true, min: 0, default: 0 },
     variations: { type: Object, default: {} }
 }, {
     timestamps: true,

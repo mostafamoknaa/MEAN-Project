@@ -1,7 +1,7 @@
 import express from "express";
-import { myConnection } from "./DataBase/dbconnection.js";
-import "./DataBase/Model/product.model.js"; 
-import { productRoutes } from "./Modules/Routes/product.Route.js";
+import { myConnection } from "./Model/connect.js";
+import "./Model/product.model.js"; 
+import { productRoutes } from "./Routes/product.Route.js";
 
 await myConnection
 

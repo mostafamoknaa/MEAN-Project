@@ -14,6 +14,8 @@ http://localhost:3000/api/products?sortBy=createdAt&order=asc
 
 http://localhost:3000/api/products?search=laptop&sortBy=price&order=asc
 
+http://localhost:3000/api/products/stock
+
 {
   "name": "Laptop",
   "description": "Gaming laptop",
