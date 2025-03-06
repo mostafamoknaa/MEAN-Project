@@ -12,7 +12,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const getusercart = async(req, res) => {
     try {
 
-        const userid = req.user.id;
+        //const userid = req.user.id;
+        const userid = req.params.userid;
         const cartdata = await cart.find({ userid: userid })
         res.status(200).json(cartdata.length ? cartdata : "Your Cart is empty");
     } catch (error) {
@@ -24,8 +25,8 @@ const getusercart = async(req, res) => {
 
 const addtousercart = async(req, res) => {
     try {
-        const userid = req.user.id;
-        const { productid, quantity } = req.body;
+        //const userid = req.user.id;
+        const { userid, productid } = req.body;
         let userCart = await cart.findOne({ userid });
 
         if (userCart) {
@@ -42,7 +43,7 @@ const addtousercart = async(req, res) => {
         } else {
             const newCart = new cart({
                 userid,
-                products: [{ productid, quantity }]
+                products: [{ productid }]
             });
 
             await newCart.save();
@@ -55,8 +56,8 @@ const addtousercart = async(req, res) => {
 
 const updatecartquantity = async(req, res) => {
     try {
-        const userid = req.user.id;
-        const { productid, quantity } = req.body;
+        //const userid = req.user.id;
+        const { userid, productid, quantity } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
             const productIndex = userCart.products.findIndex((product) => product.productid == productid);
@@ -77,8 +78,8 @@ const updatecartquantity = async(req, res) => {
 
 const deletefromcart = async(req, res) => {
     try {
-        const userid = req.user.id;
-        const { productid } = req.body;
+        //const userid = req.user.id;
+        const { userid, productid } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
             const productIndex = userCart.products.findIndex((product) => product.productid == productid);
@@ -101,13 +102,12 @@ const deletefromcart = async(req, res) => {
 
 const gustuser = async(req, res) => {
     try {
-        req.session.cart = req.body.cart || [];
-        const cart = req.session.cart;
+        const cart = req.body.cart || [];
         res.status(200).json(cart);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 const processPayment = async(req, res) => {
     try {

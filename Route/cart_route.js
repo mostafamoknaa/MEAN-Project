@@ -4,7 +4,7 @@ import { authMiddleware } from '../Middleware/auth_token.js';
 
 export const cartRoutes = express.Router()
 
-cartRoutes.use(authMiddleware);
+//cartRoutes.use(authMiddleware);
 
 cartRoutes.get('/getusercart', getusercart);
 cartRoutes.post('/addtocart', addtousercart);
