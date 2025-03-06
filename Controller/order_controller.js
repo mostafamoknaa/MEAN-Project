@@ -2,6 +2,7 @@ import { cart } from "../Model/cart_model.js";
 import { PromoCode } from "../Model/promocode_model.js";
 import { orderModel } from "../Model/order_model.js";
 import { sendEmail } from "../Email/ordermail.js";
+import { Product } from "../Model/product_model.js";
 
 const makeorder = async(req, res) => {
     try {
@@ -15,8 +16,23 @@ const makeorder = async(req, res) => {
             return res.status(400).json({ message: "Your cart is empty" });
         }
 
-        let totalAmount = usercart.products.reduce((sum, item) => sum + item.productid.price * item.quantity, 0);
+        let totalAmount = 0;
         let discountAmount = 0;
+        for (const item of usercart.products) {
+            const product = await Product.findOne({ _id: item.productid._id, stock: { $gte: item.quantity } });
+
+            if (!product) {
+                return res.status(400).json({ message: `Product '${item.productid.name}' is out of stock or unavailable.` });
+            }
+
+            totalAmount += item.productid.price * item.quantity;
+
+            productUpdates.push({
+                productId: product._id,
+                newStock: product.stock - item.quantity
+            });
+        }
+
 
 
         if (promoCode) {
@@ -51,6 +67,10 @@ const makeorder = async(req, res) => {
         sendEmail(email, newOrder);
         await cart.findOneAndUpdate({ userid }, { $set: { products: [] } });
 
+        for (const update of productUpdates) {
+            await product.findByIdAndUpdate(update.productId, { stock: update.newStock });
+        }
+
 
         res.status(201).json({ message: "Order placed successfully", order: newOrder });
 
@@ -80,57 +100,62 @@ const getuserorder = async(req, res) => {
 
 const cancleorder = async(req, res) => {
     try {
-        const orderid = req.params.id;
-        const order = await orderModel
-            .findById(orderid)
-            .populate("user", "email");
+        const { orderId } = req.params;
+        const userId = req.user.id;
+
+
+        const order = await orderModel.findOne({ _id: orderId, user: userId });
+
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
-        if (order.status === "cancelled") {
-            return res.status(400).json({ message: "Order already cancelled" });
-        }
-        if (order.status === "delivered") {
-            return res.status(400).json({ message: "Order already delivered" });
-        }
-        if (order.status === "processing") {
-            return res.status(400).json({ message: "Order already in processing" });
-        }
-        order.status = "cancelled";
-        await order.save();
-        sendEmail(order.user.email, order);
-        res.status(200).json({ message: "Order cancelled successfully" });
 
-    } catch (err) {
-        res.status(500).json({ message: err.message })
+        if (order.status !== "processing") {
+            return res.status(400).json({ message: "Order cannot be canceled at this stage" });
+        }
+
+        for (const item of order.items) {
+            await productModel.findByIdAndUpdate(item.product, {
+                $inc: { stock: item.quantity }
+            });
+        }
+
+        order.status = "canceled";
+        await order.save();
+
+        res.status(200).json({ message: "Order canceled successfully, stock restored", order });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-}
+};
+
 
 const deliverorder = async(req, res) => {
     try {
-        const orderid = req.params.id;
-        const order = await orderModel
-            .findById(orderid)
-            .populate("user", "email");
+        const { orderId } = req.params;
+        const userId = req.user.id;
+
+
+        const order = await orderModel.findOne({ _id: orderId, user: userId });
+
         if (!order) {
             return res.status(404).json({ message: "Order not found" });
         }
-        if (order.status === "cancelled") {
-            return res.status(400).json({ message: "Order already cancelled" });
+
+        if (order.status !== "processing") {
+            return res.status(400).json({ message: "Order cannot be marked as delivered at this stage" });
         }
-        if (order.status === "delivered") {
-            return res.status(400).json({ message: "Order already delivered" });
-        }
-        if (order.status === "processing") {
-            return res.status(400).json({ message: "Order already in processing" });
-        }
+
         order.status = "delivered";
         await order.save();
-        sendEmail(order.user.email, order);
-        res.status(200).json({ message: "Order delivered successfully" });
-    } catch (err) {
-        res.status(500).json({ message: err.message })
+
+        res.status(200).json({ message: "Order marked as delivered successfully", order });
+
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
+
 }
 
 
