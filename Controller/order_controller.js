@@ -18,6 +18,7 @@ const makeorder = async(req, res) => {
 
         let totalAmount = 0;
         let discountAmount = 0;
+        let productUpdates = [];
         for (const item of usercart.products) {
             const product = await Product.findOne({ _id: item.productid._id, stock: { $gte: item.quantity } });
 
@@ -26,6 +27,8 @@ const makeorder = async(req, res) => {
             }
 
             totalAmount += item.productid.price * item.quantity;
+
+
 
             productUpdates.push({
                 productId: product._id,
@@ -68,7 +71,7 @@ const makeorder = async(req, res) => {
         await cart.findOneAndUpdate({ userid }, { $set: { products: [] } });
 
         for (const update of productUpdates) {
-            await product.findByIdAndUpdate(update.productId, { stock: update.newStock });
+            await Product.findByIdAndUpdate(update.productId, { stock: update.newStock });
         }
 
 
@@ -100,7 +103,7 @@ const getuserorder = async(req, res) => {
 
 const cancleorder = async(req, res) => {
     try {
-        const { orderId } = req.params;
+        const orderId = req.params.orderId;
         const userId = req.user.id;
 
 
@@ -115,12 +118,12 @@ const cancleorder = async(req, res) => {
         }
 
         for (const item of order.items) {
-            await productModel.findByIdAndUpdate(item.product, {
+            await Product.findByIdAndUpdate(item.product, {
                 $inc: { stock: item.quantity }
             });
         }
 
-        order.status = "canceled";
+        order.status = "cancelled";
         await order.save();
 
         res.status(200).json({ message: "Order canceled successfully, stock restored", order });

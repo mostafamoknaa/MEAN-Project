@@ -8,5 +8,5 @@ orderRoutes.use(authMiddleware);
 orderRoutes.post('/makeorder', makeorder);
 orderRoutes.get('/getorders', getallorders);
 orderRoutes.get('/getuserorder', getuserorder);
-orderRoutes.put('/cancleorder/:id', cancleorder);
+orderRoutes.put('/cancleorder/:orderId', cancleorder);
 orderRoutes.put('/deliverorder/:id', deliverorder);
