@@ -78,8 +78,8 @@ const updatecartquantity = async(req, res) => {
 
 const deletefromcart = async(req, res) => {
     try {
-        //const userid = req.user.id;
-        const { userid, productid } = req.body;
+        const userid = req.params.userid;
+        const { productid } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
             const productIndex = userCart.products.findIndex((product) => product.productid == productid);
@@ -111,8 +111,8 @@ const gustuser = async(req, res) => {
 
 const processPayment = async(req, res) => {
     try {
-        const userid = req.user.id;
 
+        const userid = req.params.userid;
         const userCart = await cart.findOne({ userid }).populate("products.productid");
         if (!userCart || userCart.products.length === 0) {
             return res.status(400).json({ message: "Cart is empty" });
@@ -136,7 +136,7 @@ const processPayment = async(req, res) => {
 
 const applypromocode = async(req, res) => {
     try {
-        const userid = req.user.id;
+        const userid = req.params.userid;
         const { promocode } = req.body;
         const userCart = await cart.findOne({ userid }).populate("products.productid");
         if (!userCart || userCart.products.length === 0) {

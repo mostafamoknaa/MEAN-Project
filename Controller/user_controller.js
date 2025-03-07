@@ -23,22 +23,26 @@ const signup = async(req, res) => {
 
 const signin = async(req, res) => {
     try {
-        const { email, password } = req.body;
-        const user = await userModel.findOne({ email });
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (user.isConfirmed == false) {
+
+
+        const user = await userModel.findOne({ email: req.body.email });
+
+        if (!user) {
+            return res.status(400).json({ message: "Invalid email" });
+        }
+        const isMatch = await bcrypt.compare(req.body.password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json({ message: "Invalid password" });
+        }
+        if (user.isconfermed == false) {
             res.status(400).json({ message: "Please verify your email" });
             return
         }
-        if (user && isMatch && (user.isConfirmed == true)) {
-            const token = jwt.sign({ id: user._id, email: user.email }, 'mostafa', function(err, token) {
-                console.log(token);
-            });
 
-            res.json({ message: "User logged in successfully", token });
-        } else {
-            res.status(400).json({ message: "Invalid email or password" });
-        }
+        const token = jwt.sign({ id: user._id, email: user.email }, 'mostafa', { expiresIn: '1h' });
+
+        res.json({ message: "User logged in successfully", token });
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -51,7 +55,7 @@ const verifyEmail = (req, res) => {
             return res.status(401).json({ message: "Invalid token" })
         }
         const email = decoded;
-        await userModel.findOneAndUpdate({ email: email }, { isConfirmed: true })
+        await userModel.findOneAndUpdate({ email: email }, { isconfermed: true })
 
 
         res.json({ message: "Email verified you can now login" })
