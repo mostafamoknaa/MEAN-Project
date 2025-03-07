@@ -12,13 +12,18 @@ const userSchema = mongoose.Schema({
         city: String,
         country: String
     },
-    isConfirmed: { type: Boolean, default: false },
     paymentMethods: String,
+
+    wishlist: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "product",
+        }
+
+    ]
 }, {
     timestamps: true,
     versionKey: false
 });
 
 const userModel = mongoose.model("User", userSchema);
-
 export default userModel;
