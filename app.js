@@ -5,7 +5,9 @@ import { orderRoutes } from "./Route/order_roure.js"
 import { route } from "./Route/user_route.js"
 import { prompRoute } from "./Route/promocode_route.js"
 import { router3 } from './Route/auth_route.js';
-import  {route6} from './Route/seller_route.js';
+import { route6 } from './Route/seller_route.js';
+import { route4 } from './Route/review_route.js';
+import { Product } from './Model/product_model.js';
 
 const app = express()
 app.use(express.json())
@@ -13,8 +15,10 @@ app.use(route);
 app.use(cartRoutes);
 app.use(orderRoutes);
 app.use(prompRoute);
+app.use(Product);
 app.use(router3);
 app.use(route6);
+app.use(route4);
 
 
 const port = 3000
