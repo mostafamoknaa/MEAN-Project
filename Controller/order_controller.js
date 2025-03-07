@@ -3,12 +3,20 @@ import { PromoCode } from "../Model/promocode_model.js";
 import { orderModel } from "../Model/order_model.js";
 import { sendEmail } from "../Email/ordermail.js";
 import { Product } from "../Model/product_model.js";
+import { Payment } from "../Model/payment_model.js";
+
+import Stripe from "stripe";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const makeorder = async(req, res) => {
     try {
         const userid = req.user.id;
         const email = req.user.email;
-        const { shippingAddress, paymentMethod, promoCode } = req.body;
+        const { shippingAddress, paymentMethod, promoCode, transactionId, cardDetails } = req.body;
 
 
         const usercart = await cart.findOne({ userid }).populate("products.productid");
@@ -19,6 +27,8 @@ const makeorder = async(req, res) => {
         let totalAmount = 0;
         let discountAmount = 0;
         let productUpdates = [];
+        let paymentStatus = "";
+
         for (const item of usercart.products) {
             const product = await Product.findOne({ _id: item.productid._id, stock: { $gte: item.quantity } });
 
@@ -47,8 +57,39 @@ const makeorder = async(req, res) => {
             }
         }
 
+        if (paymentMethod == 'cash') {
+            paymentStatus = 'pending'
+        } else {
 
-        let paymentStatus = paymentMethod === "card" ? "pending" : "paid";
+            if (!transactionId || !amountPaid) {
+                return res.status(400).json({ message: "Payment details are required for online transactions" });
+            }
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: Math.round(totalAmount),
+                currency: "usd",
+                payment_method: transactionId,
+                confirm: true,
+            });
+            if (paymentIntent.status == 'succeeded') {
+                paymentStatus = 'succeeded'
+                const newPayment = new Payment({
+                    userid,
+                    amount: totalAmount,
+                    currency: "usd",
+                    paymentMethod: paymentMethod,
+                    paymentStatus: "successful",
+                    transactionId: paymentIntent.id
+                });
+                await newPayment.save();
+            } else {
+                paymentStatus = 'failed'
+                return res.status(400).json({ message: "Invalid payment method" });
+            }
+
+            paymentStatus = "paid";
+
+        }
 
         const newOrder = new orderModel({
             user: userid,
@@ -68,7 +109,7 @@ const makeorder = async(req, res) => {
 
         await newOrder.save();
         sendEmail(email, newOrder);
-        await cart.findOneAndUpdate({ userid }, { $set: { products: [] } });
+        await cart.deleteOne({ userid });
 
         for (const update of productUpdates) {
             await Product.findByIdAndUpdate(update.productId, { stock: update.newStock });
@@ -124,6 +165,7 @@ const cancleorder = async(req, res) => {
         }
 
         order.status = "cancelled";
+        order.paymentStatus = "refunded";
         await order.save();
 
         res.status(200).json({ message: "Order canceled successfully, stock restored", order });
@@ -151,6 +193,7 @@ const deliverorder = async(req, res) => {
         }
 
         order.status = "delivered";
+        order.paymentStatus = "paid";
         await order.save();
 
         res.status(200).json({ message: "Order marked as delivered successfully", order });
