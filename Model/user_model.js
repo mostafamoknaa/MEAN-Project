@@ -12,6 +12,10 @@ const userSchema = mongoose.Schema({
         city: String,
         country: String
     },
+    point: {
+        type: Number,
+        default: 2
+    },
     paymentMethods: String,
 
     wishlist: [{
