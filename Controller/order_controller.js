@@ -66,29 +66,26 @@ const makeorder = async(req, res) => {
             }
 
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: Math.round(totalAmount),
+                amount: totalAmount,
                 currency: "usd",
                 payment_method: transactionId,
                 confirm: true,
             });
             if (paymentIntent.status == 'succeeded') {
                 paymentStatus = 'succeeded'
-                const newPayment = new Payment({
-                    userid,
-                    amount: totalAmount,
-                    currency: "usd",
-                    paymentMethod: paymentMethod,
-                    paymentStatus: "successful",
-                    transactionId: paymentIntent.id
-                });
-                await newPayment.save();
+                    // const newPayment = new Payment({
+                    //     userid,
+                    //     amount: totalAmount,
+                    //     currency: "usd",
+                    //     paymentMethod: paymentMethod,
+                    //     paymentStatus: "successful",
+                    //     transactionId: paymentIntent.id
+                    // });
+                    // await newPayment.save();
             } else {
                 paymentStatus = 'failed'
                 return res.status(400).json({ message: "Invalid payment method" });
             }
-
-            paymentStatus = "paid";
-
         }
 
         const newOrder = new orderModel({
@@ -194,6 +191,13 @@ const deliverorder = async(req, res) => {
 
         order.status = "delivered";
         order.paymentStatus = "paid";
+
+
+        const user = await userModel.findById(userId);
+        user.point += 10;
+        await user.save();
+
+
         await order.save();
 
         res.status(200).json({ message: "Order marked as delivered successfully", order });

@@ -44,7 +44,7 @@ const signin = async(req, res) => {
             return
         }
 
-        const token = jwt.sign({ id: user._id, email: user.email }, 'mostafa', { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id, email: user.email }, 'mostafa');
 
         res.json({ message: "User logged in successfully", token });
     } catch (err) {
