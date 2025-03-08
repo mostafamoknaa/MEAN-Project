@@ -16,7 +16,7 @@ const makeorder = async(req, res) => {
     try {
         const userid = req.user.id;
         const email = req.user.email;
-        const { shippingAddress, paymentMethod, promoCode, paymentMethodId } = req.body;
+        const { shippingAddress, paymentMethod, promoCode, transactionId } = req.body;
 
 
         const usercart = await cart.findOne({ userid }).populate("products.productid");
@@ -61,11 +61,14 @@ const makeorder = async(req, res) => {
             paymentStatus = 'pending'
         }
         if (paymentMethod == 'card') {
+            if (!transactionId) {
+                return res.status(400).json({ success: false, message: "Transaction ID is required!" });
+            }
 
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: Math.round(totalAmount * 100),
                 currency: "usd",
-                payment_method: paymentMethodId,
+                payment_method: transactionId,
                 confirm: true,
                 automatic_payment_methods: {
                     enabled: true,
