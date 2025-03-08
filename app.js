@@ -8,9 +8,12 @@ import { router3 } from './Route/auth_route.js';
 import { route6 } from './Route/seller_route.js';
 import { route4 } from './Route/review_route.js';
 import { productRoutes } from './Route/product_route.js';
+import cors from 'cors';
+
 
 const app = express()
 app.use(express.json())
+app.use(cors())
 app.use(route);
 app.use(cartRoutes);
 app.use(orderRoutes);

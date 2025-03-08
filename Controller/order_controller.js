@@ -16,7 +16,7 @@ const makeorder = async(req, res) => {
     try {
         const userid = req.user.id;
         const email = req.user.email;
-        const { shippingAddress, paymentMethod, promoCode, transactionId, cardDetails } = req.body;
+        const { shippingAddress, paymentMethod, promoCode, paymentMethodId } = req.body;
 
 
         const usercart = await cart.findOne({ userid }).populate("products.productid");
@@ -59,32 +59,24 @@ const makeorder = async(req, res) => {
 
         if (paymentMethod == 'cash') {
             paymentStatus = 'pending'
-        } else {
-
-            if (!transactionId) {
-                return res.status(400).json({ message: "Payment details are required for online transactions" });
-            }
+        }
+        if (paymentMethod == 'card') {
 
             const paymentIntent = await stripe.paymentIntents.create({
-                amount: totalAmount,
+                amount: Math.round(totalAmount * 100),
                 currency: "usd",
-                payment_method: transactionId,
+                payment_method: paymentMethodId,
                 confirm: true,
+                automatic_payment_methods: {
+                    enabled: true,
+                    allow_redirects: "never"
+                }
             });
-            if (paymentIntent.status == 'succeeded') {
-                paymentStatus = 'succeeded'
-                const newPayment = new Payment({
-                    userid,
-                    amount: totalAmount,
-                    currency: "usd",
-                    paymentMethod: paymentMethod,
-                    paymentStatus: "successful",
-                    transactionId: paymentIntent.id
-                });
-                await newPayment.save();
+            if (paymentIntent.status === "succeeded") {
+                paymentStatus = 'succeeded';
             } else {
-                paymentStatus = 'failed'
-                return res.status(400).json({ message: "Invalid payment method" });
+                paymentStatus = 'failed';
+                return res.status(400).json({ success: false, message: "Payment failed" });
             }
         }
 
@@ -119,6 +111,7 @@ const makeorder = async(req, res) => {
         res.status(500).json({ message: err.message });
     }
 };
+
 
 const getallorders = async(req, res) => {
     try {
