@@ -23,7 +23,7 @@ app.use(route4);
 
 const port = 3000
 
-connectDB;
+connectDB();
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
