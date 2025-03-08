@@ -1,5 +1,5 @@
 import express from 'express';
-import { myconnection } from "./Model/connect.js"
+import { connectDB } from "./Model/connect.js"
 import { cartRoutes } from "./Route/cart_route.js"
 import { orderRoutes } from "./Route/order_roure.js"
 import { route } from "./Route/user_route.js"
@@ -26,8 +26,8 @@ app.use(route4);
 
 const port = 3000
 
-//connectDB();
-myconnection;
+connectDB();
+//myconnection;
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
