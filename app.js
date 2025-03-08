@@ -8,6 +8,7 @@ import { router3 } from './Route/auth_route.js';
 import { route6 } from './Route/seller_route.js';
 import { route4 } from './Route/review_route.js';
 import { productRoutes } from './Route/product_route.js';
+import { catrouter } from './Route/category_route.js'
 import cors from 'cors';
 
 
@@ -22,6 +23,7 @@ app.use(productRoutes);
 app.use(router3);
 app.use(route6);
 app.use(route4);
+app.use(catrouter);
 
 
 const port = 3000

@@ -17,10 +17,15 @@ const userSchema = mongoose.Schema({
         default: 2,
         required: true
     },
+    status: {
+        type: String,
+        enum: ["pending", "accepted", "rejected"],
+        default: "pending",
+    },
     paymentMethods: String,
     wishlist: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: "product",
+        ref: "Product",
     }]
 }, {
     timestamps: true,

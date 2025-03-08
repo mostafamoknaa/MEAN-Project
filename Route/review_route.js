@@ -8,9 +8,9 @@ import { authMiddleware } from '../Middleware/auth_token.js'
 
 //customer can make review and rating
 
-route4.post('/review', authMiddleware, createReview);
-route4.get('/review', authMiddleware, getUserAllReview);
-route4.get('/review/:id', getAllReviewOfProduct);
+route4.post('/createreview', authMiddleware, createReview);
+route4.get('/userreview', authMiddleware, getUserAllReview);
+route4.get('/productreview/:id', getAllReviewOfProduct);
 
 
 

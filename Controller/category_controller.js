@@ -1,76 +1,84 @@
-import Category from "../models/Category";
-import userModel from "../models/User";
-export async function createCategory(req, res) {
-  try {
-    const { name, description } = req.body;
-    if (!name) {
-      return res.status(400).json({ error: "Category name is required" });
+import { categoryModel } from "../Model/category_model.js";
+import { Product } from "../Model/product_model.js";
+import mongoose from "mongoose";
+
+export async function createcategoryModel(req, res) {
+    try {
+        const { name, description, image } = req.body;
+        if (!name) {
+            return res.status(400).json({ error: "categoryModel name is required" });
+        }
+        const existingcategoryModel = await categoryModel.findOne({ name });
+        if (existingcategoryModel) {
+            return res.status(400).json({ error: "categoryModel already exists" });
+        }
+        const category = new categoryModel({ name, description, image });
+        await category.save();
+        res
+            .status(201)
+            .json({ message: "categoryModel created successfully", categoryModel });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-    const existingCategory = await Category.findOne({ name });
-    if (existingCategory) {
-      return res.status(400).json({ error: "Category already exists" });
-    }
-    const category = new Category({ name, description });
-    await category.save();
-    res
-      .status(201)
-      .json({ message: "Category created successfully", category });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 }
 
 export async function getCategories(req, res) {
-  try {
-    const categories = await Category.find();
-    res.status(200).json(categories);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-export async function getCategoryById(req, res) {
-  try {
-    const category = await Category.findById(req.params.id);
-    res.status(200).json(category);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}
-export async function updateCategory(req, res) {
-  try {
-    const { name, description } = req.body;
-    const categoryId = req.params.id;
-    const existingCategory = await Category.findById(categoryId);
-    if (!existingCategory) {
-      return res.status(404).json({ error: "Category not found" });
+    try {
+        const categories = await categoryModel.find();
+        res.status(200).json(categories);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-    const updatedCategory = await Category.findByIdAndUpdate(
-      categoryId,
-      req.body,
-      { new: true }
-    );
-    if (name && name !== existingCategory.name) {
-      await Product.updateMany(
-        { category: existingCategory.name },
-        { category: name }
-      );
-    }
-    res.status(200).json(updatedCategory);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 }
+export async function getcategoryModelById(req, res) {
+    try {
+        const categoryModel = await categoryModel.findById(req.params.id);
+        res.status(200).json(categoryModel);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+export async function updatecategoryModel(req, res) {
+    try {
+        const { name, description } = req.body;
+        const categoryModelId = req.params.id;
+        const existingcategoryModel = await categoryModel.findById(categoryModelId);
+        if (!existingcategoryModel) {
+            return res.status(404).json({ error: "categoryModel not found" });
+        }
+        const updatedcategoryModel = await categoryModel.findByIdAndUpdate(
+            categoryModelId,
+            req.body, { new: true }
+        );
+        if (name && name !== existingcategoryModel.name) {
+            await Product.updateMany({ categoryModel: existingcategoryModel.name }, { categoryModel: name });
+        }
+        res.status(200).json(updatedcategoryModel);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+}
+
 export async function deleteCategory(req, res) {
-  try {
-    const categoryId = req.params.id;
-    const category = await Category.findById(categoryId);
-    if (!category) {
-      return res.status(404).json({ error: "Category not found" });
+    try {
+        const categoryId = req.params.id;
+
+
+        if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+            return res.status(400).json({ error: "Invalid category ID format" });
+        }
+
+        const category = await categoryModel.findById(categoryId);
+        if (!category) {
+            return res.status(404).json({ error: "Category not found" });
+        }
+
+        await Product.deleteMany({ category: category._id });
+
+        await categoryModel.findByIdAndDelete(categoryId);
+
+        res.status(204).send();
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-    await Product.deleteMany({ category: category.name });
-    await Category.findByIdAndDelete(categoryId);
-    res.status(204).json();
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
 }
