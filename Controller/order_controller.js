@@ -61,7 +61,7 @@ const makeorder = async(req, res) => {
             paymentStatus = 'pending'
         } else {
 
-            if (!transactionId || !amountPaid) {
+            if (!transactionId) {
                 return res.status(400).json({ message: "Payment details are required for online transactions" });
             }
 
@@ -73,15 +73,15 @@ const makeorder = async(req, res) => {
             });
             if (paymentIntent.status == 'succeeded') {
                 paymentStatus = 'succeeded'
-                    // const newPayment = new Payment({
-                    //     userid,
-                    //     amount: totalAmount,
-                    //     currency: "usd",
-                    //     paymentMethod: paymentMethod,
-                    //     paymentStatus: "successful",
-                    //     transactionId: paymentIntent.id
-                    // });
-                    // await newPayment.save();
+                const newPayment = new Payment({
+                    userid,
+                    amount: totalAmount,
+                    currency: "usd",
+                    paymentMethod: paymentMethod,
+                    paymentStatus: "successful",
+                    transactionId: paymentIntent.id
+                });
+                await newPayment.save();
             } else {
                 paymentStatus = 'failed'
                 return res.status(400).json({ message: "Invalid payment method" });
