@@ -147,10 +147,6 @@ const cancleorder = async(req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        if (order.status !== "processing") {
-            return res.status(400).json({ message: "Order cannot be canceled at this stage" });
-        }
-
         for (const item of order.items) {
             await Product.findByIdAndUpdate(item.product, {
                 $inc: { stock: item.quantity }
@@ -181,16 +177,12 @@ const deliverorder = async(req, res) => {
             return res.status(404).json({ message: "Order not found" });
         }
 
-        if (order.status !== "processing") {
-            return res.status(400).json({ message: "Order cannot be marked as delivered at this stage" });
-        }
-
         order.status = "delivered";
         order.paymentStatus = "paid";
 
 
         const user = await userModel.findById(userId);
-        user.point += 10;
+        user.point += 2;
         await user.save();
 
 
