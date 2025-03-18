@@ -1,0 +1,12 @@
+<div style="text-align: center; padding: 20px;">
+  <h1>Upload Product Image</h1>
+  <input type="file" (change)="onFileSelected($event)" accept="image/*" />
+  <button (click)="onUpload()" [disabled]="!selectedFile">Upload</button>
+  <p>imageUrl: {{ imageUrl }}</p>
+  @if (imageUrl) {
+    <div style="margin-top: 20px;">
+      <h3>Uploaded Image:</h3>
+      <img [src]="imageUrl" alt="Uploaded Product" style="max-width: 300px;" />
+    </div>
+  }
+</div>
