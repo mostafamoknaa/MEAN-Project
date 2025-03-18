@@ -8,10 +8,13 @@ export const authMiddleware = (req, res, next) => {
     }
 
     try {
-        const decodedd = jwt.verify(token, 'mostafa');
+        const decodedd = jwt.verify(token, 'iti'); 
+        console.log(decodedd)
         req.user = decodedd;
         next();
     } catch (e) {
         res.status(400).json({ message: "Invalid Token" });
     }
 };
+
+ 

@@ -13,7 +13,7 @@ const signup = async(req, res) => {
         req.body.password = await bcrypt.hashSync(req.body.password, 10);
         const users = await userModel.insertMany(req.body);
         sendEmail(req.body.email);
-        res.send("User created successfully");
+        res.status(201).json("User created successfully");
     } catch (err) {
         res.status(400).json({ message: err.message });
     }
@@ -36,7 +36,7 @@ const signin = async(req, res) => {
             return;
         }
 
-        const token = jwt.sign({ id: user._id, email: user.email }, "mostafa");
+        const token = jwt.sign({ id: user._id, email: user.email }, 'iti', { expiresIn: '1h' });
 
         res.json({ message: "User logged in successfully", token });
     } catch (err) {

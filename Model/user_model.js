@@ -2,15 +2,15 @@ import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema({
     isconfermed: { type: Boolean, default: false },
-    name: { type: String, required: true },
+    name: { type: String,required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String },
     password: { type: String, required: false },
     role: { type: String, enum: ['customer', 'seller', 'admin'], default: 'customer' },
     address: {
-        street: { type: String, required: true },
-        city: { type: String, required: true },
-        country: { type: String, required: true }
+        street: { type: String },
+        city: { type: String },
+        country: { type: String }
     },
     point: {
         type: Number,
