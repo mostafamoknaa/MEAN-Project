@@ -14,10 +14,7 @@ import cors from 'cors';
 
 const app = express()
 app.use(express.json())
-app.use(cors({
-    origin: "http://localhost:4200", // Explicitly allow frontend URL
-    credentials: true
-}));
+app.use(cors());
 app.use(route);
 app.use(cartRoutes);
 app.use(orderRoutes);

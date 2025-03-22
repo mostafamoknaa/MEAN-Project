@@ -134,7 +134,7 @@ const getoderbyid = async(req, res) => {
 
 const getallorders = async(req, res) => {
     try {
-        const orders = await orderModel.find({});
+        const orders = await orderModel.find({}).populate("user");
         res.status(200).json({ orders });
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -143,6 +143,17 @@ const getallorders = async(req, res) => {
 const getuserorder = async(req, res) => {
     try {
         const userid = req.user.id;
+        const orders = await orderModel.find({ user: userid }).populate('user');
+        res.status(200).json({ orders });
+
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
+const getuserorders = async(req, res) => {
+    try {
+        const userid = req.params.id;;
         const orders = await orderModel.find({ user: userid }).populate('user');
         res.status(200).json({ orders });
 
@@ -214,4 +225,4 @@ const deliverorder = async(req, res) => {
 
 
 
-export { makeorder, getallorders, getuserorder, cancleorder, deliverorder, getoderbyid };
+export { makeorder, getallorders, getuserorder, cancleorder, deliverorder, getoderbyid, getuserorders };
