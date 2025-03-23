@@ -14,7 +14,7 @@ const getusercart = async(req, res) => {
 
         //const userid = req.user.id;
         const userid = req.params.userid;
-        const cartdata = await cart.find({ userid: userid })
+        const cartdata = await cart.find({ userid: userid }).populate("products.productid");
         res.status(200).json(cartdata.length ? cartdata : "Your Cart is empty");
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -23,34 +23,37 @@ const getusercart = async(req, res) => {
 
 
 
-const addtousercart = async(req, res) => {
+const addToUserCart = async (req, res) => {
     try {
-        //const userid = req.user.id;
-        const { userid, productid } = req.body;
+        const { userid, products } = req.body;
         let userCart = await cart.findOne({ userid });
 
         if (userCart) {
-            const product = userCart.products.find((item) => item.productid == productid);
-            if (product) {
-                res.json({ message: "Product already exists in your cart" });
-            } else {
-                userCart.products.push({ productid });
+            for (const newProduct of products) {
+                const { productid, quantity } = newProduct;
+                const existingProduct = userCart.products.find((item) => item.productid.toString() === productid);
+
+                if (existingProduct) {
+                    return res.status(400).json({ message: `Product ${productid} already exists in your cart` });
+                } else {
+                    userCart.products.push({ productid, quantity });
+                }
             }
 
             await userCart.save();
-            res.json({ message: "Product added to cart" });
+            return res.json({ message: "Product(s) added to cart" });
 
         } else {
             const newCart = new cart({
                 userid,
-                products: [{ productid }]
+                products
             });
 
             await newCart.save();
-            res.json({ message: "New cart created and product added" });
+            return res.json({ message: "New cart created and product(s) added" });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 };
 
@@ -224,4 +227,4 @@ const applypromocode = async(req, res) => {
 
 
 
-export { addtousercart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser, applypromocode }
+export { addToUserCart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser, applypromocode }
