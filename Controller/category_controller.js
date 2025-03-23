@@ -32,8 +32,8 @@ export async function getCategories(req, res) {
 }
 export async function getcategoryModelById(req, res) {
     try {
-        const categoryModel = await categoryModel.findById(req.params.id);
-        res.status(200).json(categoryModel);
+        const categoryModel1 = await categoryModel.findById(req.params.id);
+        res.status(200).json(categoryModel1);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

@@ -7,11 +7,12 @@ const userSchema = mongoose.Schema({
     phone: { type: String },
     password: { type: String, required: false },
     role: { type: String, enum: ['customer', 'seller', 'admin'], default: 'customer' },
-    address: {
-        street: { type: String },
-        city: { type: String },
-        country: { type: String }
-    },
+    // address: {
+    //     street: { type: String, required: true },
+    //     city: { type: String, required: true },
+    //     country: { type: String, required: true }
+    // },
+    address: { type: String, required: true },
     point: {
         type: Number,
         default: 2,

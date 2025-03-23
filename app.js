@@ -12,9 +12,8 @@ import { productRoutes } from './Route/product_route.js';
 import { catrouter } from './Route/category_route.js'
 
 
-const app = express();
-
-app.use(express.json());
+const app = express()
+app.use(express.json())
 app.use(cors());
 app.use(route);
 app.use(cartRoutes);
