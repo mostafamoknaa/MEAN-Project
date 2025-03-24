@@ -9,11 +9,13 @@ dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+
+//get user id by using middleware it take atoken and get of it the id of the current user 
 const getusercart = async(req, res) => {
     try {
 
-        //const userid = req.user.id;
-        const userid = req.params.userid;
+        const userid = req.user.id;
+        
         const cartdata = await cart.find({ userid: userid }).populate("products.productid");
         res.status(200).json(cartdata.length ? cartdata : "Your Cart is empty");
     } catch (error) {
@@ -25,7 +27,8 @@ const getusercart = async(req, res) => {
 
 const addToUserCart = async (req, res) => {
     try {
-        const { userid, products } = req.body;
+        const userid = req.user.id;
+        const {  products } = req.body;
         let userCart = await cart.findOne({ userid });
 
         if (userCart) {

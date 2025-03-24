@@ -4,10 +4,10 @@ import { authMiddleware } from '../Middleware/auth_token.js';
 
 export const cartRoutes = express.Router()
 
-//cartRoutes.use(authMiddleware);
+// cartRoutes.use(authMiddleware);
 
-cartRoutes.get('/getusercart/:userid', getusercart);
-cartRoutes.post('/addtocart', addToUserCart);
+cartRoutes.get('/getusercart',authMiddleware, getusercart);
+cartRoutes.post('/addtocart',authMiddleware, addToUserCart);
 cartRoutes.put('/updatecartquantity', updatecartquantity);
 cartRoutes.delete('/deletefromcart/:userid', deletefromcart);
 cartRoutes.post('/gustuser', gustuser);
