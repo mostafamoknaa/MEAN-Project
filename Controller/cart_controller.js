@@ -4,6 +4,7 @@ import { Payment } from "../Model/payment_model.js";
 import { PromoCode } from "../Model/promocode_model.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -82,25 +83,35 @@ const updatecartquantity = async(req, res) => {
     }
 };
 
-const deletefromcart = async(req, res) => {
+const deleteFromCart = async (req, res) => {
     try {
-        const userid = req.params.userid;
-        const { productid } = req.body;
-        const userCart = await cart.findOne({ userid });
-        if (userCart) {
-            const productIndex = userCart.products.findIndex((product) => product.productid == productid);
-            if (productIndex >= 0) {
-                userCart.products.splice(productIndex, 1);
-                await userCart.save();
-                res.json({ message: "Product deleted from cart" });
-            } else {
-                res.json({ message: "Product not found in cart" });
-            }
+        const userid = req.user.id; // Assuming req.user is set by authentication middleware
+        const productid = req.params.id;
+
+        // Validate productid
+        if (!mongoose.Types.ObjectId.isValid(productid)) {
+            return res.status(400).json({ message: 'Invalid product ID' });
+        }
+
+        // Use atomic update to remove product from array
+        const result = await cart.updateOne(
+            { userid },
+            { $pull: { products: { productid: new mongoose.Types.ObjectId(productid) } } }
+        );
+
+        if (result.modifiedCount > 0) {
+            return res.status(200).json({ message: 'Product removed from cart successfully' });
         } else {
-            res.json({ message: "Cart not found" });
+            // Check if cart exists
+            const cartExists = await cart.findOne({ userid });
+            if (!cartExists) {
+                return res.status(404).json({ message: 'Cart not found' });
+            }
+            return res.status(404).json({ message: 'Product not found in cart' });
         }
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error('Error deleting from cart:', error);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 };
 
@@ -230,4 +241,4 @@ const applypromocode = async(req, res) => {
 
 
 
-export { addToUserCart, getusercart, updatecartquantity, deletefromcart, processPayment, gustuser, applypromocode }
+export { addToUserCart, getusercart, updatecartquantity, deleteFromCart, processPayment, gustuser, applypromocode }
