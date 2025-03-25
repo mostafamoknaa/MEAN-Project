@@ -21,12 +21,13 @@ const signup = async(req, res) => {
 
 const signin = async(req, res) => {
     try {
-        const user = await userModel.findOne({ email: req.body.email });
+        const{ email, password } = req.body;
+        const user = await userModel.findOne({ email: email });
 
         if (!user) {
             return res.status(400).json({ message: "Invalid email" });
         }
-        const isMatch = await bcrypt.compare(req.body.password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             return res.status(400).json({ message: "Invalid password" });
@@ -36,7 +37,7 @@ const signin = async(req, res) => {
             return;
         }
 
-        const token = jwt.sign({ id: user._id, email: user.email }, 'iti', { expiresIn: '1h' });
+        const token = jwt.sign({ id: user._id, email: user.email }, 'iti', { expiresIn: '6h' });
 
         res.json({ message: "User logged in successfully", token });
     } catch (err) {
