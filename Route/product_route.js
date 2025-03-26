@@ -8,6 +8,7 @@ import {
     getAllProducts,
     updateProduct,
     deleteProduct,
+    checkCoupon
 } from "../Controller/product_controller.js";
 
 export const productRoutes = express.Router();
@@ -26,3 +27,5 @@ productRoutes.get("/allproduct", getAllProducts);
 productRoutes.get("/getproduct/:id", getProductById);
 productRoutes.put("/updataproduct/:id", updateProduct);
 productRoutes.delete("/deleteproduct/:id", deleteProduct);
+
+productRoutes.post('/checkcoupon', checkCoupon); // for checking coupon code

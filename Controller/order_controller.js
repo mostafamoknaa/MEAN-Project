@@ -73,7 +73,9 @@ const makeorder = async(req, res) => {
                 automatic_payment_methods: {
                     enabled: true,
                     allow_redirects: "never"
-                }
+                },
+                success_url: `http://localhost:4200/userorder?session_id={CHECKOUT_SESSION_ID}&status=success`,
+                cancel_url: `http://localhost:4200/userorder?session_id={CHECKOUT_SESSION`
             });
             if (paymentIntent.status === "succeeded") {
                 paymentStatus = 'succeeded';

@@ -1,7 +1,7 @@
 import { cart } from "../Model/cart_model.js"
-import { Product } from "../Model/product_model.js";
 import { Payment } from "../Model/payment_model.js";
 import { PromoCode } from "../Model/promocode_model.js";
+import { Product } from "../Model/product_model.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
@@ -12,9 +12,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const getusercart = async(req, res) => {
     try {
 
-        //const userid = req.user.id;
-        const userid = req.params.userid;
-        const cartdata = await cart.find({ userid: userid })
+        const userid = req.user.id;
+        // const userid = req.params.userid;
+        const cartdata = await cart.find({ userid: userid }).populate("products.productid");
         res.status(200).json(cartdata.length ? cartdata : "Your Cart is empty");
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -56,8 +56,8 @@ const addtousercart = async(req, res) => {
 
 const updatecartquantity = async(req, res) => {
     try {
-        //const userid = req.user.id;
-        const { userid, productid, quantity } = req.body;
+        const userid = req.user.id;
+        const { productid, quantity } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
             const productIndex = userCart.products.findIndex((product) => product.productid == productid);
@@ -78,8 +78,8 @@ const updatecartquantity = async(req, res) => {
 
 const deletefromcart = async(req, res) => {
     try {
-        const userid = req.params.userid;
-        const { productid } = req.body;
+        const userid = req.user.id;
+        const productid = req.params.userid;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
             const productIndex = userCart.products.findIndex((product) => product.productid == productid);

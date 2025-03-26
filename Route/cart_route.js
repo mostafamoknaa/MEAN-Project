@@ -6,10 +6,10 @@ export const cartRoutes = express.Router()
 
 //cartRoutes.use(authMiddleware);
 
-cartRoutes.get('/getusercart/:userid', getusercart);
+cartRoutes.get('/getusercart', authMiddleware, getusercart);
 cartRoutes.post('/addtocart', addtousercart);
-cartRoutes.put('/updatecartquantity', updatecartquantity);
-cartRoutes.delete('/deletefromcart/:userid', deletefromcart);
+cartRoutes.put('/updatecartquantity', authMiddleware, updatecartquantity);
+cartRoutes.delete('/deletefromcart/:userid', authMiddleware, deletefromcart);
 cartRoutes.post('/gustuser', gustuser);
 cartRoutes.post('/processpayment/:userid', processPayment);
 cartRoutes.post('/applypromocode/:userid', applypromocode);

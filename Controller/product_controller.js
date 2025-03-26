@@ -1,5 +1,5 @@
 import { Product } from "../Model/product_model.js";
-
+import { PromoCode } from "../Model/promocode_model.js";
 // Get all products
 const getProducts = async(req, res) => {
     try {
@@ -171,6 +171,27 @@ export async function deleteProduct(req, res) {
         return res.status(500).json({ error: " error" });
     }
 }
+
+export const checkCoupon = async(req, res) => {
+    try {
+        const { code } = req.body;
+        const coupon = await PromoCode.findOne({ code });
+
+        if (!coupon) {
+            return res.status(404).json({ success: false, message: "Coupon not found" });
+        }
+
+        const today = new Date();
+        if (today > new Date(coupon.expiry)) {
+            return res.status(400).json({ success: false, message: "Coupon expired" });
+        }
+
+        res.json({ success: true, discount: coupon.discount });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
 
 export {
     getProducts,
