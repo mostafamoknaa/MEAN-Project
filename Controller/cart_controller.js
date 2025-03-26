@@ -11,7 +11,7 @@ dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 
-//get user id by using middleware it take atoken and get of it the id of the current user 
+
 const getusercart = async(req, res) => {
     try {
 
@@ -63,7 +63,7 @@ const addToUserCart = async (req, res) => {
 
 const updatecartquantity = async(req, res) => {
     try {
-        //const userid = req.user.id;
+     
         const { userid, productid, quantity } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
@@ -85,15 +85,15 @@ const updatecartquantity = async(req, res) => {
 
 const deleteFromCart = async (req, res) => {
     try {
-        const userid = req.user.id; // Assuming req.user is set by authentication middleware
+        const userid = req.user.id; 
         const productid = req.params.id;
 
-        // Validate productid
+        
         if (!mongoose.Types.ObjectId.isValid(productid)) {
             return res.status(400).json({ message: 'Invalid product ID' });
         }
 
-        // Use atomic update to remove product from array
+        
         const result = await cart.updateOne(
             { userid },
             { $pull: { products: { productid: new mongoose.Types.ObjectId(productid) } } }
@@ -102,7 +102,7 @@ const deleteFromCart = async (req, res) => {
         if (result.modifiedCount > 0) {
             return res.status(200).json({ message: 'Product removed from cart successfully' });
         } else {
-            // Check if cart exists
+        
             const cartExists = await cart.findOne({ userid });
             if (!cartExists) {
                 return res.status(404).json({ message: 'Cart not found' });
@@ -175,67 +175,6 @@ const applypromocode = async(req, res) => {
     }
 };
 
-
-
-// const processPayment = async(req, res) => {
-//     try {
-//         const { userid } = req.params;
-//         const { paymentMethodId } = req.body; 
-
-//         // ✅ Fetch User Cart
-//         const userCart = await cart.findOne({ userid }).populate({
-//             path: "products.productid",
-//             model: "Product"
-//         });
-
-//         if (!userCart || userCart.products.length === 0) {
-//             return res.status(400).json({ message: "Cart is empty" });
-//         }
-
-
-//         const totalAmount = userCart.products.reduce(
-//             (sum, item) => sum + item.productid.price * item.quantity,
-//             0
-//         );
-
-//         if (totalAmount <= 0) {
-//             return res.status(400).json({ message: "Invalid total amount", totalAmount });
-//         }
-
-
-//         const paymentIntent = await stripe.paymentIntents.create({
-//             amount: Math.round(totalAmount * 100), 
-//             currency: "usd",
-//             payment_method: paymentMethodId,
-//             confirm: true,
-//         });
-
-
-//         const newPayment = new Payment({
-//             userid,
-//             amount: totalAmount,
-//             currency: "usd",
-//             paymentMethodId,
-//             paymentStatus: "successful",
-//             transactionId: paymentIntent.id
-//         });
-
-//         await newPayment.save();
-
-
-//         userCart.products = [];
-//         await userCart.save();
-
-//         res.status(200).json({
-//             message: "Payment successful",
-//             paymentIntent,
-//             totalAmount
-//         });
-
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
 
 
 
