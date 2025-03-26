@@ -4,52 +4,100 @@ import { categoryModel as Category  } from "../Model/category_model.js";
 // Get all products
 const getProducts = async (req, res) => {
     try {
-        let { search, minPrice, maxPrice, category, sortBy, order } = req.query;
+        let { search, minPrice, maxPrice, category, sortBy, order, id } = req.query;
         let query = {};
         let sortOptions = {};
 
-        if (search) {
-            query.name = { $regex: search, $options: "i" };
+        // البحث باستخدام ID المنتج (دقيق)
+        if (id) {
+            if (!mongoose.Types.ObjectId.isValid(id)) {
+                return res.status(400).json({ 
+                    message: "Invalid product ID format" 
+                });
+            }
+            
+            const product = await Product.findById(id).populate("category", "name _id");
+            
+            if (!product) {
+                return res.status(404).json({ 
+                    message: "Product not found with the provided ID" 
+                });
+            }
+            
+            return res.status(200).json({ 
+                message: "Product retrieved successfully",
+                data: [product] 
+            });
         }
 
+        // البحث النصي (بالاسم أو الفئة)
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: "i" } },
+                { 'category.name': { $regex: search, $options: "i" } }
+            ];
+        }
+
+        // فلترة بالسعر
         if (minPrice || maxPrice) {
             query.price = {};
             if (minPrice) query.price.$gte = parseFloat(minPrice);
             if (maxPrice) query.price.$lte = parseFloat(maxPrice);
         }
 
+        // البحث بالفئة
         if (category) {
-            const foundCategory = await Category.findOne({ name: category });
-            if (foundCategory) {
-                query.category = foundCategory._id; 
+            if (mongoose.Types.ObjectId.isValid(category)) {
+                query.category = category;
             } else {
-                return res.status(404).json({ message: "Category not found" });
+                const foundCategory = await Category.findOne({ 
+                    name: { $regex: category, $options: "i" } 
+                });
+                if (foundCategory) {
+                    query.category = foundCategory._id;
+                } else {
+                    return res.status(404).json({ 
+                        message: "Category not found",
+                        suggestions: await getCategorySuggestions(category)
+                    });
+                }
             }
         }
 
+        // الترتيب
         if (sortBy) {
-            const validFields = ["price", "createdAt"];
+            const validFields = ["price", "createdAt", "name"];
             if (validFields.includes(sortBy)) {
                 sortOptions[sortBy] = order === "desc" ? -1 : 1;
             }
         }
 
+        // جلب المنتجات
         const products = await Product.find(query)
-        .populate("category", "name _id")
-        .select("_id name") 
-        .sort(sortOptions);
-    
+            .populate("category", "name _id")
+            .sort(sortOptions);
 
         if (products.length === 0) {
-            return res.status(404).json({ message: "No products found matching your search." });
+            const suggestions = await getSearchSuggestions(search, category);
+            return res.status(404).json({ 
+                message: "No products found matching your search.",
+                suggestions 
+            });
         }
 
-        res.status(200).json({ message: "Done", data: products });
+        res.status(200).json({ 
+            message: "Products retrieved successfully",
+            count: products.length,
+            data: products 
+        });
     } catch (error) {
-        res.status(500).json({ message: "Server Error", error });
+        console.error('Error in getProducts:', error);
+        res.status(500).json({ 
+            message: "Server Error",
+            error: error.message 
+        });
     }
 };
-
 
 // Get product by ID
 const getProductById = async(req, res) => {

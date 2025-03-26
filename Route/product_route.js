@@ -13,6 +13,7 @@ import {
 export const productRoutes = express.Router();
 
 productRoutes.get("/products", getProducts);
+productRoutes.get("/products/search", getProducts);
 productRoutes.get("/products/stock", getStockAvailability);
 productRoutes.get("/products/stock/:id", getStockAvailabilityById);
 productRoutes.get("/products/:id", getProductById);
