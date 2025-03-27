@@ -8,7 +8,6 @@ const getProducts = async (req, res) => {
         let query = {};
         let sortOptions = {};
 
-        // البحث باستخدام ID المنتج (دقيق)
         if (id) {
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 return res.status(400).json({ 
@@ -30,7 +29,6 @@ const getProducts = async (req, res) => {
             });
         }
 
-        // البحث النصي (بالاسم أو الفئة)
         if (search) {
             query.$or = [
                 { name: { $regex: search, $options: "i" } },
@@ -38,14 +36,12 @@ const getProducts = async (req, res) => {
             ];
         }
 
-        // فلترة بالسعر
         if (minPrice || maxPrice) {
             query.price = {};
             if (minPrice) query.price.$gte = parseFloat(minPrice);
             if (maxPrice) query.price.$lte = parseFloat(maxPrice);
         }
 
-        // البحث بالفئة
         if (category) {
             if (mongoose.Types.ObjectId.isValid(category)) {
                 query.category = category;
@@ -64,7 +60,6 @@ const getProducts = async (req, res) => {
             }
         }
 
-        // الترتيب
         if (sortBy) {
             const validFields = ["price", "createdAt", "name"];
             if (validFields.includes(sortBy)) {
@@ -72,7 +67,6 @@ const getProducts = async (req, res) => {
             }
         }
 
-        // جلب المنتجات
         const products = await Product.find(query)
             .populate("category", "name _id")
             .sort(sortOptions);
