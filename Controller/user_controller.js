@@ -187,16 +187,9 @@ const deleteUserinfo = async(req, res) => {
 
 const getAllUsers = async(req, res) => {
     try {
-        const userId = req.user.id;
-
-        const userrole = await userModel.findById(userId);
-
-        if (userrole.role !== "admin") {
-            return res.status(403).json({ message: "You are not admin" });
-        } else {
-            const users = await userModel.find();
-            res.json(users);
-        }
+       
+        const users = await userModel.find();
+        res.json(users);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -248,9 +241,7 @@ const updateUser = async(req, res) => {
 
         const userrole = await userModel.findById(userId);
 
-        if (userrole.role !== "admin") {
-            return res.status(403).json({ message: "You are not admin" });
-        } else {
+     
             const id = req.params.id;
             const user = await userModel.findById(id);
             if (!user) {
@@ -260,7 +251,7 @@ const updateUser = async(req, res) => {
                 new: true,
             });
             res.json(updatedUser);
-        }
+        
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

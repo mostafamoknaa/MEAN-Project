@@ -4,7 +4,7 @@ import { authMiddleware } from '../Middleware/auth_token.js'
 
 export const orderRoutes = express.Router()
 
-orderRoutes.post('/makeorder', makeorder);
+orderRoutes.post('/makeorder', authMiddleware,makeorder);
 orderRoutes.get('/getorders', getallorders);
 orderRoutes.get('/getuserorder', getuserorder);
 orderRoutes.get('/getuserorder/:id', getuserorders)

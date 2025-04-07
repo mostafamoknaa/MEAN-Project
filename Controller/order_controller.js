@@ -12,12 +12,16 @@ dotenv.config();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-const makeorder = async(req, res) => {
+const makeorder = async (req, res) => {
     try {
         const userid = req.user.id;
         const email = req.user.email;
         const { shippingAddress, paymentMethod, promoCode, transactionId } = req.body;
 
+        
+        if (!shippingAddress || !shippingAddress.street || !shippingAddress.city) {
+            return res.status(400).json({ message: "Shipping address is required" });
+        }
 
         const usercart = await cart.findOne({ userid }).populate("products.productid");
         if (!usercart || usercart.products.length === 0) {
@@ -27,44 +31,35 @@ const makeorder = async(req, res) => {
         let totalAmount = 0;
         let discountAmount = 0;
         let productUpdates = [];
-        let paymentStatus = "";
+        let paymentStatus = "pending"; // Default value
 
         for (const item of usercart.products) {
             const product = await Product.findOne({ _id: item.productid._id, stock: { $gte: item.quantity } });
-
             if (!product) {
                 return res.status(400).json({ message: `Product '${item.productid.name}' is out of stock or unavailable.` });
             }
-
             totalAmount += item.productid.price * item.quantity;
-
-
-
             productUpdates.push({
                 productId: product._id,
                 newStock: product.stock - item.quantity
             });
         }
 
-
-
         if (promoCode) {
             const promoCodeData = await PromoCode.findOne({ code: promoCode });
-
             if (promoCodeData && promoCodeData.isActive && promoCodeData.expirationDate > new Date()) {
                 discountAmount = (totalAmount * promoCodeData.discountValue) / 100;
                 totalAmount -= discountAmount;
             }
         }
 
-        if (paymentMethod == 'cash') {
-            paymentStatus = 'pending'
-        }
-        if (paymentMethod == 'card') {
+        // Handle payment method and status
+        if (paymentMethod?.type === "cash") {
+            paymentStatus = "pending";
+        } else if (paymentMethod?.type === "card") {
             if (!transactionId) {
-                return res.status(400).json({ success: false, message: "Transaction ID is required!" });
+                return res.status(400).json({ success: false, message: "Transaction ID is required for card payments!" });
             }
-
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: Math.round(totalAmount * 100),
                 currency: "usd",
@@ -75,10 +70,8 @@ const makeorder = async(req, res) => {
                     allow_redirects: "never"
                 }
             });
-            if (paymentIntent.status === "succeeded") {
-                paymentStatus = 'succeeded';
-            } else {
-                paymentStatus = 'failed';
+            paymentStatus = paymentIntent.status === "succeeded" ? "succeeded" : "failed";
+            if (paymentStatus === "failed") {
                 return res.status(400).json({ success: false, message: "Payment failed" });
             }
         }
@@ -90,13 +83,14 @@ const makeorder = async(req, res) => {
                 name: item.productid.name,
                 price: item.productid.price,
                 quantity: item.quantity,
+                subtotal: item.productid.price * item.quantity // Ensure subtotal is set
             })),
             totalAmount,
             discount: { code: promoCode || null, amount: discountAmount },
             status: "processing",
             shippingAddress,
-            paymentMethod,
-            paymentStatus
+            paymentMethod: paymentMethod || { type: "cash" }, // Default to cash if not provided
+            paymentStatus // Will use the computed value
         });
 
         await newOrder.save();
@@ -107,9 +101,7 @@ const makeorder = async(req, res) => {
             await Product.findByIdAndUpdate(update.productId, { stock: update.newStock });
         }
 
-
         res.status(201).json({ message: "Order placed successfully", order: newOrder });
-
     } catch (err) {
         res.status(500).json({ message: err.message });
     }
@@ -153,7 +145,7 @@ const getuserorder = async(req, res) => {
 
 const getuserorders = async(req, res) => {
     try {
-        const userid = req.params.id;;
+        const userid = req.params.id;
         const orders = await orderModel.find({ user: userid }).populate('user');
         res.status(200).json({ orders });
 

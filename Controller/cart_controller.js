@@ -45,7 +45,7 @@ const addToUserCart = async (req, res) => {
             }
 
             await userCart.save();
-            return res.json({ message: "Product(s) added to cart" });
+            return res.json({ message: "Product(s) added to cart" ,"usercart":userCart});
 
         } else {
             const newCart = new cart({

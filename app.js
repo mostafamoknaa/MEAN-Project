@@ -10,7 +10,7 @@ import { route6 } from './Route/seller_route.js';
 import { route4 } from './Route/review_route.js';
 import { productRoutes } from './Route/product_route.js';
 import { catrouter } from './Route/category_route.js'
-
+import   {gemni} from './Route/gemeni_route.js';
 
 const app = express()
 app.use(express.json())
@@ -24,9 +24,10 @@ app.use(router3);
 app.use(route6);
 app.use(route4);
 app.use(catrouter);
+app.use(gemni);
 
 
-const port = 3000
+const port =  3000;
 
 connectDB();
 //myconnection;
