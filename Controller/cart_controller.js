@@ -1,7 +1,7 @@
 import { cart } from "../Model/cart_model.js"
-import { Product } from "../Model/product_model.js";
 import { Payment } from "../Model/payment_model.js";
 import { PromoCode } from "../Model/promocode_model.js";
+import { Product } from "../Model/product_model.js";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
@@ -63,8 +63,8 @@ const addToUserCart = async (req, res) => {
 
 const updatecartquantity = async(req, res) => {
     try {
-        //const userid = req.user.id;
-        const { userid, productid, quantity } = req.body;
+        const userid = req.user.id;
+        const { productid, quantity } = req.body;
         const userCart = await cart.findOne({ userid });
         if (userCart) {
             const productIndex = userCart.products.findIndex((product) => product.productid == productid);
