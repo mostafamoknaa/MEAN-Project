@@ -58,7 +58,7 @@ const verifyEmail = (req, res) => {
     });
 };
 
-const addToWishlist = async(req, res) => {
+const addToWishlist = async (req, res) => {
     try {
         const userId = req.user.id;
         const { wishlist } = req.body;
@@ -67,9 +67,25 @@ const addToWishlist = async(req, res) => {
             return res.status(400).json({ message: "Invalid wishlist data" });
         }
 
+        const user = await userModel.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Check for duplicates
+        const existingProducts = user.wishlist.map(id => id.toString());
+        const newProducts = wishlist.filter(productId => !existingProducts.includes(productId));
+
+        if (newProducts.length === 0) {
+            return res.status(400).json({ message: "All provided products are already in your wishlist" });
+        }
+
+        // Add new products to wishlist
         const updatedUser = await userModel
             .findByIdAndUpdate(
-                userId, { $addToSet: { wishlist: { $each: wishlist } } }, { new: true }
+                userId,
+                { $addToSet: { wishlist: { $each: newProducts } } },
+                { new: true }
             )
             .populate("wishlist");
 
@@ -83,30 +99,34 @@ const addToWishlist = async(req, res) => {
         });
     } catch (error) {
         console.error("Error updating wishlist:", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        res.status(500).json({ message: "Internal Server Error", error: error.message });
     }
 };
 
 const showProductInWishlist = async(req, res) => {
     const userId = req.user.id;
+   console.log(userId);
     try {
         const user = await userModel.findById(userId).populate("wishlist");
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
+        console.log(user);
+
+        const wishlist = user.wishlist || [];
         res.status(200).json({
-            message: "Wishlist retrieved successfully",
-            wishlist: user.wishlist
+            wishlist:wishlist
         });
     } catch (error) {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
+
 const deleteProductFromWishlist = async(req, res) => {
     try {
-        const userId = req.user.id;
-        const productId = req.params.id;
+        const userId = req.user.id;  // User ID is coming from authenticated session
+        const productId = req.params.id;  // Product ID from the URL parameters
 
         const user = await userModel.findById(userId);
         if (!user) {
@@ -117,19 +137,21 @@ const deleteProductFromWishlist = async(req, res) => {
             return res.status(400).json({ message: "Product not found in wishlist" });
         }
 
-        user.wishlist = user.wishlist.filter(
-            (item) => item.toString() !== productId
-        );
-        await user.save();
+        // Remove the product from the wishlist
+        user.wishlist = user.wishlist.filter((item) => item.toString() !== productId);
+        await user.save();  // Save the updated user data to the database
 
+        // Respond with the updated wishlist
         res.status(200).json({
             message: "Product removed from wishlist successfully",
-            wishlist: user.wishlist,
+            wishlist: user.wishlist,  // Return updated wishlist array
         });
     } catch (error) {
+        console.error(error);  // Log the error for debugging
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
 const getUserinfo = async(req, res) => {
     const userId = req.user.id;

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import {Product} from './product_model.js';
 
 const userSchema = mongoose.Schema({
     isconfermed: { type: Boolean, default: false },
